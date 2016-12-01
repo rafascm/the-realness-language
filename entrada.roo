@@ -1,0 +1,21 @@
+The Library is Officially Open
+Because Reading is ? FUNDAMENTAL;
+
+CategoryIs HelloWorld;
+
+Integer x,a,b;
+Boolean c,d;
+Double z;
+String str;
+
+Shantay
+  WroteU( 'hello, world' );
+  a = 9;
+  b = 10;
+  x = 3 * a + b/(2*b*b + 1.0);
+  str = 'testando str';
+  WroteU( x + 10 );
+  WroteU(str);
+Sashay.
+
+The Library is Officially Closed;

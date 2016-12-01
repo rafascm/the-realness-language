@@ -1,65 +1,62 @@
-DELIM   [\t\n ]
+%{
+
+char* troca_aspas( char* lexema );
+
+%}
+
+DELIM   [\t ]
+LINHA   [\n]
 NUMERO  [0-9]
 LETRA   [A-Za-z_]
-INT     {NUMERO}+   
-FLOAT   {NUMERO}+("."{NUMERO}+)?
+INT     {NUMERO}+
+DOUBLE  {NUMERO}+("."{NUMERO}+)?
 ID      {LETRA}({LETRA}|{NUMERO})*
-CHAR    '.'
-STRING   \"[^\n]*\"
-BOOL    "true"|"false"
+CSTRING "'"([^\n']|"''")*"'"
+
+COMMENT "(*"([^*]|"*"[^)])*"*)"
 
 %%
 
+{LINHA}    { nlinha++; }
 {DELIM}    {}
-{INT}      { yylval = yytext; return tk_Nint; }
-{FLOAT}    { yylval = yytext; return tk_Nfloat; }
-{CHAR}     { yylval = yytext; return tk_Nchar; }
-{STRING}   { yylval = yytext; return tk_Nstring; }
-{BOOL}     { yylval = yytext; return tk_Nbool; }
+{COMMENT}  {}
 
-"int"      { yylval = yytext; return tk_int; }
-"float"    { yylval = yytext; return tk_float; }
-"string"   { yylval = yytext; return tk_string; }
-"char"     { yylval = yytext; return tk_char; }
-"bool"     { yylval = yytext; return tk_bool; }
-"void"     { yylval = yytext; return tk_void; }
-
-":"       { yylval = yytext; return tk_inicio; }
-"ty"      { yylval = yytext; return tk_final; }
-
-"for"      { yylval = yytext; return tk_for; }
-"repeat"   { yylval = yytext; return tk_repeat;}
-"until"    { yylval = yytext; return tk_until; }
-"while"    { yylval = yytext; return tk_while; }
-"do"       { yylval = yytext; return tk_do; }
-"if"       { yylval = yytext; return tk_if; }
-"then"     { yylval = yytext; return tk_then; }
-"else"     { yylval = yytext; return tk_else; }
-
-"return"   { yylval = yytext; return tk_return; }
-
-"set"     { yylval = yytext; return tk_printf; }
-"get"     { yylval = yytext; return tk_scanf; }
+"CategoryIs"  { yylval = Atributos( yytext ); return TK_PROGRAM; }
+"Shantay"       { yylval = Atributos( yytext ); return TK_BEGIN; }
+"Sashay"         { yylval = Atributos( yytext ); return TK_END; }
+"WroteU"     { yylval = Atributos( yytext ); return TK_WRITELN; }
+"If"          { yylval = Atributos( yytext ); return TK_IF; }
+"Then"        { yylval = Atributos( yytext ); return TK_THEN; }
+"Else"        { yylval = Atributos( yytext ); return TK_ELSE; }
+"For"         { yylval = Atributos( yytext ); return TK_FOR; }
+"To"          { yylval = Atributos( yytext ); return TK_TO; }
+"Do"          { yylval = Atributos( yytext ); return TK_DO; }
+"Array"       { yylval = Atributos( yytext ); return TK_ARRAY; }
+"Of"          { yylval = Atributos( yytext ); return TK_OF; }
+"The Library is Officially Open\nBecause Reading is ? FUNDAMENTAL" { yylval = Atributos( yytext ); return TK_ABRIR1; }
+"The Library is Officially Closed" { yylval = Atributos( yytext ); return TK_FECHAR; }
+".."       { yylval = Atributos( yytext ); return TK_PTPT; }
+"="       { yylval = Atributos( yytext ); return TK_ATRIB; }
+"<="       { yylval = Atributos( yytext ); return TK_MEIG; }
+">="       { yylval = Atributos( yytext ); return TK_MAIG; }
+"<>"       { yylval = Atributos( yytext ); return TK_DIF; }
+"And"      { yylval = Atributos( yytext ); return TK_AND; }
 
 
-"and"      { yylval = yytext; return tk_and; }
-"not"      { yylval = yytext; return tk_not; }
-"or"       { yylval = yytext; return tk_or; }
+{CSTRING}  { yylval = Atributos( troca_aspas( yytext ), Tipo( "string" ) );
+             return TK_CSTRING; }
+{ID}       { yylval = Atributos( yytext ); return TK_ID; }
+{INT}      { yylval = Atributos( yytext, Tipo( "int" ) ); return TK_CINT; }
+{DOUBLE}   { yylval = Atributos( yytext, Tipo( "double" ) ); return TK_CDOUBLE; }
 
-"in"       { yylval = yytext; return tk_in; }
-
-"<="       { yylval = yytext; return tk_meig; }
-">="       { yylval = yytext; return tk_maig; }
-"!="       { yylval = yytext; return tk_dif; }
-"="        { yylval = yytext; return tk_ig; }
-">"       { yylval = yytext; return tk_dif; }
-"<"        { yylval = yytext; return tk_ig; }
- 
-"="       { yylval = yytext; return tk_atrib; } 
-
-"main()"   { yylval = yytext; return tk_main; }
-
-{ID}       { yylval = yytext; return tk_id; }
-.          { yylval = yytext; return yytext[0]; }
+.          { yylval = Atributos( yytext ); return *yytext; }
 
 %%
+
+char* troca_aspas( char* lexema ) {
+  int n = strlen( lexema );
+  lexema[0] = '"';
+  lexema[n-1] = '"';
+
+  return lexema;
+}
