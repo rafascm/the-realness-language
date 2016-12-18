@@ -1,24 +1,22 @@
 The library is officially open
 because reading is? FUNDAMENTAL;
 
-int a;
+int teste;
+char test;
+double tes;
+string te;
+boolean t;
 
 The Realness <shantay u stay>
-  char mat[2][2];
 
-  for(int i=0;i<2;i=i+1) <shantay u stay>
-    for(int j=0;j<2;j=j+1) <shantay u stay>
-      mat[i][j] = 'a';
-    </sashay away>
-  </sashay away>
-
-  for(int ai=0;ai<2;ai=ai+1) <shantay u stay>
-    for(int aj=0;aj<2;aj=aj+1) <shantay u stay>
-      wroteU(mat[ai][aj]);
-    </sashay away>
-  </sashay away>
-
-  wroteU("ola");
+  te = "oiaa";
+  string aa = "oiav";
+  wroteU(aa);
+  if(aa<te)
+    wroteU("é menor");
+  else
+    wroteU("nao é menor");
+  wroteU("que "+te);
 </sashay away>
 
 The library is officially closed;
