@@ -7,8 +7,24 @@ double tes;
 string te;
 boolean t;
 
+
 The Realness <shantay u stay>
 
+double x[2];
+double z[3];
+
+x[0]=0;
+x[1]=1;
+z[0]=0;
+z[1]=1;
+z[2]=2;
+
+if(x@z)
+  wroteU("igual");
+else
+  wroteU("diferente");
+
+/*
   te = "oiaa";
   string aa = "oiaa";
   wroteU(aa);
@@ -17,6 +33,7 @@ The Realness <shantay u stay>
   else
     wroteU("nao é igual");
   wroteU("que "+te);
+*/
 </sashay away>
 
 The library is officially closed;

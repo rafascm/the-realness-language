@@ -30,8 +30,8 @@ COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 
 
 "The Realness"         { yylval = Atributos( yytext ); return TK_MAIN;    }
-"<shantay u stay>"       { yylval = Atributos( yytext ); return TK_BEGIN;   }
-"</sashay away>"        { yylval = Atributos( yytext ); return TK_END;     }
+"<shantay u stay>"     { yylval = Atributos( yytext ); return TK_BEGIN;   }
+"</sashay away>"       { yylval = Atributos( yytext ); return TK_END;     }
 "ret"                  { yylval = Atributos( yytext ); return TK_RETURN;  }
 
 "wroteU"               { yylval = Atributos( yytext ); return TK_WRITE;   }
@@ -44,9 +44,9 @@ COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 "do"                   { yylval = Atributos( yytext ); return TK_DO;      }
 "choices"              { yylval = Atributos( yytext ); return TK_SWITCH;  }
 "thankyou"             { yylval = Atributos( yytext ); return TK_BREAK;   }
+
+
 "in"                   { yylval = Atributos( yytext ); return TK_IN;   }
-
-
 "="                    { yylval = Atributos( yytext ); return TK_ATRIB;   }
 "<="                   { yylval = Atributos( yytext ); return TK_LE;      }
 ">="                   { yylval = Atributos( yytext ); return TK_GE;      }
@@ -54,10 +54,10 @@ COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 "<"                    { yylval = Atributos( yytext ); return TK_L;       }
 ">"                    { yylval = Atributos( yytext ); return TK_G;       }
 "!="                   { yylval = Atributos( yytext ); return TK_DIFF;    }
-
+"@"                    { yylval = Atributos( yytext ); return TK_CMPARRAY;}
 "and"                  { yylval = Atributos( yytext ); return TK_AND;     }
 "or"                   { yylval = Atributos( yytext ); return TK_OR;      }
-"not"                   { yylval = Atributos( yytext ); return TK_NOT;     }
+"not"                  { yylval = Atributos( yytext ); return TK_NOT;     }
 "mod"                  { yylval = Atributos( yytext ); return TK_MOD;     }
 
 "The library is officially open\nbecause reading is? FUNDAMENTAL" {

@@ -41,9 +41,12 @@ string atribuicao_matriz(Atributos s1, Atributos pos_linha, Atributos pos_coluna
 
 int is_atribuivel(Atributos s1, Atributos s3);
 int toInt(string valor);
+double toDouble(string valor);
+char toChar(string valor);
 
 Atributos gera_codigo_operador(Atributos s1, string opr, Atributos s3);
 Atributos gera_codigo_operador_unario(string opr, Atributos s2);
+Atributos gera_codigo_operador_in(Atributos var, Atributos array)
 Atributos gera_codigo_if(Atributos expr, string cmd_then, string cmd_else);
 Atributos gera_codigo_while(Atributos expr, Atributos bloco);
 Atributos gera_codigo_do_while(Atributos bloco, Atributos expr);
@@ -122,7 +125,7 @@ string includes =
 %token TK_CSTRING TK_RETURN TK_ATRIB TK_CCHAR
 %token TK_WRITE TK_READ
 %token TK_G TK_L TK_GE TK_LE TK_DIFF TK_IF TK_ELSE
-%token TK_E TK_AND TK_OR TK_NOT TK_BREAK TK_IN
+%token TK_E TK_AND TK_OR TK_NOT TK_BREAK TK_IN TK_CMPARRAY
 %token TK_FOR TK_WHILE TK_DO TK_SWITCH TK_START TK_STOP
 
 %left TK_OR
@@ -453,7 +456,8 @@ E : E '+' E     { $$ = gera_codigo_operador($1, "+", $3);    }
   | E TK_MOD E  { $$ = gera_codigo_operador($1, "%", $3);    }
   | TK_NOT E    { $$ = gera_codigo_operador_unario("!", $2); }
   | '(' E ')'   { $$ = $2;                                   }
-  | E TK_IN E   { $$ = gera_codigo_operador($1, "in", $3);   }
+  | E TK_CMPARRAY E { $$ = gera_codigo_operador($1,"@",$3);  }
+  | E TK_IN F   { $$ = gera_codigo_operador($1, "in", $3);   }
   | F
   ;
 
@@ -688,6 +692,10 @@ void inicializa_operadores() {
   tipo_opr["iinc"] = "b";
   tipo_opr["cins"] = "b";
 
+  // @
+  tipo_opr["i@i"] = "i";
+  tipo_opr["d@d"] = "i";
+  tipo_opr["c@c"] = "i";
 }
 
 void insere_var_ts(string nome, Tipo tipo){
@@ -902,6 +910,20 @@ int toInt(string valor) {
   return aux;
 }
 
+double toDouble(string valor) {
+  int aux = -1;
+  if( sscanf( valor.c_str(), "%d", &aux ) != 1 )
+    erro( "Numero invalido: " + valor );
+  return aux;
+}
+
+char toChar(string valor) {
+  int aux = -1;
+  if( sscanf( valor.c_str(), "%d", &aux ) != 1 )
+    erro( "Numero invalido: " + valor );
+  return aux;
+}
+
 Atributos gera_codigo_operador(Atributos s1, string opr, Atributos s3){
   Atributos ss;
 
@@ -941,6 +963,28 @@ Atributos gera_codigo_operador(Atributos s1, string opr, Atributos s3){
     ss.codigo += "  " + ss.valor + " = strcmp(" + s1.valor + ", " + s3.valor + ") ;\n";
     ss.codigo += "  " + ss.valor + " = " + ss.valor +  " == 0;\n";
   }
+  else if(s1.tipo.ndim == 1 && s3.tipo.ndim == 1 && opr == "@"){
+    int tam, aux;
+    string atr1, atr2;
+    string tipo = tipo1;
+
+    if(tipo == "c") aux = sizeof(toChar(tipo));
+    else if (tipo == "d") aux = sizeof(toDouble(tipo));
+    else if (tipo == "i" || tipo == "b") aux = sizeof(toInt(tipo));
+
+    if (s1.tipo.tam[0]>s3.tipo.tam[0]){
+      tam = s1.tipo.tam[0]*aux;
+      atr1 = s1.valor;
+      atr2 = s3.valor;
+    }
+    else {
+      tam = s3.tipo.tam[0]*aux;
+      atr1 = s3.valor;
+      atr2 = s1.valor;
+    }
+    ss.codigo += "  " + ss.valor + " = memcmp(" + atr1 + ", " + atr2 + ", " + toString(tam) + ") ; \n";
+    ss.codigo += "  " + ss.valor + " = !" + ss.valor + ";\n";
+  }
 
   // Tipo basico
   else {
@@ -949,6 +993,10 @@ Atributos gera_codigo_operador(Atributos s1, string opr, Atributos s3){
               + ";\n";
   }
   return ss;
+}
+
+Atributos gera_codigo_operador_in(Atributos var, Atributos array){
+
 }
 
 Atributos gera_codigo_operador_unario(string opr, Atributos s2){
