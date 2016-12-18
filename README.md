@@ -5,7 +5,7 @@ Just another very fishy language to y'all
 Stay Foxy , UON UON :p
 
  - How does it work?
-    - open and close known **{}** are **<shantay u stay> </sashay away>**.
+    - open and close known **{}** are **\<shantay u stay> </sashay away>**.
     - the commands **if**, **else**, **while**, **do while** and **for** have the same syntax as C language.
     - the **.roo** files have to start with:
       *The library is officially open
