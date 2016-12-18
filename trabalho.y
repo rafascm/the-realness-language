@@ -633,6 +633,7 @@ void inicializa_operadores() {
   tipo_opr["c==c"] = "b";
   tipo_opr["i==c"] = "b";
   tipo_opr["c==i"] = "b";
+  tipo_opr["s==s"] = "b";
 
   // !=
   tipo_opr["i!=i"] = "b";
@@ -936,6 +937,11 @@ Atributos gera_codigo_operador(Atributos s1, string opr, Atributos s3){
     ss.codigo += "  " + ss.valor + " = strcmp(" + s1.valor + ", " + s3.valor + ") ;\n";
     ss.codigo += "  " + ss.valor + " = " + ss.valor +  " < 0;\n";
   }
+  else if(tipo1 == "s" && tipo3 == "s" && tipo_resultado == "b" && opr == "=="){
+    ss.codigo += "  " + ss.valor + " = strcmp(" + s1.valor + ", " + s3.valor + ") ;\n";
+    ss.codigo += "  " + ss.valor + " = " + ss.valor +  " == 0;\n";
+  }
+
   // Tipo basico
   else {
     ss.codigo += "  " + ss.valor + " = "

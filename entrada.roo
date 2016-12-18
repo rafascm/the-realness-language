@@ -10,12 +10,12 @@ boolean t;
 The Realness <shantay u stay>
 
   te = "oiaa";
-  string aa = "oiav";
+  string aa = "oiaa";
   wroteU(aa);
-  if(aa<te)
-    wroteU("é menor");
+  if(aa==te)
+    wroteU("é igual");
   else
-    wroteU("nao é menor");
+    wroteU("nao é igual");
   wroteU("que "+te);
 </sashay away>
 
