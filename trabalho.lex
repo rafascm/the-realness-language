@@ -17,8 +17,8 @@ COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 {DELIM}    {}
 {COMMENT}  {}
 
-"all_T_all_shade"      {                               return TK_TRUE;    }
-"no_T_no_shade"        {                               return TK_FALSE;   }
+"allTallShade"         {                               return TK_TRUE;    }
+"noTnoShade"           {                               return TK_FALSE;   }
 
 "int"                  {                               return TK_INT;     }
 "char"                 {                               return TK_CHAR;    }
@@ -30,8 +30,8 @@ COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 
 
 "The Realness"         { yylval = Atributos( yytext ); return TK_MAIN;    }
-"{"                    { yylval = Atributos( yytext ); return TK_BEGIN;   }
-"}"                    { yylval = Atributos( yytext ); return TK_END;     }
+"<shantay u stay>"       { yylval = Atributos( yytext ); return TK_BEGIN;   }
+"</sashay away>"        { yylval = Atributos( yytext ); return TK_END;     }
 "ret"                  { yylval = Atributos( yytext ); return TK_RETURN;  }
 
 "wroteU"               { yylval = Atributos( yytext ); return TK_WRITE;   }
@@ -43,7 +43,8 @@ COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 "while"                { yylval = Atributos( yytext ); return TK_WHILE;   }
 "do"                   { yylval = Atributos( yytext ); return TK_DO;      }
 "choices"              { yylval = Atributos( yytext ); return TK_SWITCH;  }
-"thankyou"             { yylval = Atributos( yytext ); return TK_BREAK;}
+"thankyou"             { yylval = Atributos( yytext ); return TK_BREAK;   }
+"in"                   { yylval = Atributos( yytext ); return TK_IN;   }
 
 
 "="                    { yylval = Atributos( yytext ); return TK_ATRIB;   }

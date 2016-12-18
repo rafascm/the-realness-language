@@ -19,9 +19,10 @@ int yylex();
 void yyerror(const char* st);
 void erro(string msg);
 void inicializa_operadores();
-void insere_ts(string nome, Tipo tipo);
+void insere_var_ts(string nome, Tipo tipo);
 
 Tipo consulta_ts(string nome);
+
 
 string toString(int n);
 string declara_variavel(string nome, Tipo tipo);
@@ -30,7 +31,7 @@ string traduz_realness_para_interno(string realness);
 string traduz_interno_para_realness(string interno);
 string renomeia_variavel_usuario(string nome);
 string gera_nome_var_temp(string tipo_interno);
-string atribuicao_var(Atributos s1, Atributos s3);
+string atribui_var(Atributos s1, Atributos s3);
 string leitura_padrao(Atributos s3);
 string gera_label(string tipo);
 string desbloquifica(string lexema);
@@ -51,11 +52,10 @@ Atributos gera_codigo_for(Atributos atrib, Atributos condicao, Atributos pulo, A
 string gera_teste_limite_array( string indice_1, Tipo tipoArray );
 string gera_teste_limite_matriz( Atributos id, Atributos indice_1, Atributos indice_2);
 
+
 map<string, Tipo> ts;
-// Pilha de variaveis (temporarias ou definidas pelo usuario)
-// que vao ser declaradas no inicio de cada bloco.
-vector<string> vars_bloco;
-// Faz o mapeamento dos tipos dos operadores
+vector<string> global_vars;
+vector<string> block_vars;
 map<string, string> tipo_opr;
 
 struct Tipo {
@@ -83,6 +83,7 @@ struct Tipo {
     this->tam[0] = i;
     this->tam[1] = j;
   }
+
 };
 
 struct Atributos {
@@ -121,7 +122,7 @@ string includes =
 %token TK_CSTRING TK_RETURN TK_ATRIB TK_CCHAR
 %token TK_WRITE TK_READ
 %token TK_G TK_L TK_GE TK_LE TK_DIFF TK_IF TK_ELSE
-%token TK_E TK_AND TK_OR TK_NOT TK_BREAK
+%token TK_E TK_AND TK_OR TK_NOT TK_BREAK TK_IN
 %token TK_FOR TK_WHILE TK_DO TK_SWITCH TK_START TK_STOP
 
 %left TK_OR
@@ -143,87 +144,104 @@ S : TK_START ';' DECLS MAIN TK_STOP ';'
 
 MAIN  : TK_MAIN BLOCO
         {
-          $$.codigo = "int main()" + $2.codigo;
+          $$.codigo += "int main()" + $2.codigo;
         }
       |
       ;
 
 DECLS : DECLS DECL
-        { $$.codigo = $1.codigo + $2.codigo; }
+        { $$.codigo += global_vars[global_vars.size()-1];
+          global_vars.pop_back();
+          $$.codigo += $2.codigo;
+         }
       |
-        { $$.codigo = ""; }
+        { global_vars.push_back(""); }
       ;
 
-DECL : VAR ';' // Variaveis globais
-      { $$.codigo = $1.codigo; }
+DECL : G_VAR ';'
      | FUNCTION
      ;
 
-// Permite tipo var1, var2, var3 e tipo var1 = expr;
-// mas nao tipo var1 = expr, var2;
+FUNCTION : TIPO TK_ID '(' F_PARAMS ')' BLOCO
+      ;
+
+F_PARAMS : PARAMS
+        ;
+
+PARAMS : PARAM ',' PARAMS
+      | PARAM
+      ;
+
+PARAM : TIPO TK_ID
+     | TIPO TK_ID '[' E ']'
+     | TIPO TK_ID '[' E ']' '[' E ']'
+     |
+     ;
+
+G_VAR : TIPO TK_ID
+        {
+          $$ = Atributos($2.valor, $1.tipo);
+          global_vars.push_back("");
+          global_vars[global_vars.size()-1]+= declara_variavel($2.valor, $1.tipo) + ";\n";
+          insere_var_ts($2.valor, $1.tipo);
+        }
+      | TIPO TK_ID '[' TK_CINT ']'
+        {
+          $$ = Atributos($2.valor, Tipo($1.tipo.tipo_base, toInt($4.valor)));
+          global_vars[global_vars.size()-1] += declara_variavel($$.valor, $$.tipo) + ";\n";
+          insere_var_ts($$.valor, $$.tipo);
+        }
+      | TIPO TK_ID '[' TK_CINT ']' '[' TK_CINT ']'
+        {
+          $$ = Atributos($2.valor, Tipo($1.tipo.tipo_base, toInt($4.valor), toInt($7.valor)));
+          global_vars[global_vars.size()-1] += "  " + declara_variavel($$.valor, $$.tipo) + ";\n";
+          insere_var_ts($$.valor, $$.tipo);
+        }
+      ;
+
 VAR : TIPO VAR_DEFS
       {
         $$.codigo = "";
-        // Os nomes das variaveis estao na lista_str de $2.
-        // Cada variavel e' inserida na tabela de simbolos e
-        // sua declaracao e' adicionada a lista de declaracao
-        // do bloco atual, que so sera impressa no inicio do bloco.
-        for(vector<string>::iterator it = $2.lista_str.begin();
-                                     it != $2.lista_str.end();
-                                     it++){
-          vars_bloco[vars_bloco.size()-1] += "  "
-                                          + (declara_variavel(*it, $1.tipo))
-                                          + ";\n";
-          insere_ts(*it, $1.tipo);
+        for(vector<string>::iterator it = $2.lista_str.begin(); it != $2.lista_str.end(); it++){
+          block_vars[block_vars.size()-1] += "  " + (declara_variavel(*it, $1.tipo)) + ";\n";
+          insere_var_ts(*it, $1.tipo);
         }
       }
     | TIPO TK_ID TK_ATRIB E
       {
         $$ = Atributos($2.valor, $1.tipo);
-        vars_bloco[vars_bloco.size()-1] += "  "
-                                        + declara_variavel($2.valor, $1.tipo)
-                                        + ";\n";
-        insere_ts($2.valor, $1.tipo);
+        block_vars[block_vars.size()-1] += "  " + declara_variavel($2.valor, $1.tipo) + ";\n";
+        insere_var_ts($2.valor, $1.tipo);
         $2.tipo = $1.tipo;
-        $$.codigo = atribuicao_var($2, $4);
+        $$.codigo = atribui_var($2, $4);
       }
     | TIPO TK_ID '[' TK_CINT ']'
       {
         $$ = Atributos($2.valor, Tipo($1.tipo.tipo_base, toInt($4.valor)));
-        vars_bloco[vars_bloco.size()-1] += "  "
-                                        + declara_variavel($$.valor, $$.tipo)
-                                        + ";\n";
-        insere_ts($$.valor, $$.tipo);
+        block_vars[block_vars.size()-1] += "  " + declara_variavel($$.valor, $$.tipo) + ";\n";
+        insere_var_ts($$.valor, $$.tipo);
       }
     | TIPO TK_ID '[' TK_CINT ']' '[' TK_CINT ']'
       {
         $$ = Atributos($2.valor, Tipo($1.tipo.tipo_base, toInt($4.valor), toInt($7.valor)));
-        vars_bloco[vars_bloco.size()-1] += "  "
-                                        + declara_variavel($$.valor, $$.tipo)
-                                        + ";\n";
-        insere_ts($$.valor, $$.tipo);
+        block_vars[block_vars.size()-1] += "  " + declara_variavel($$.valor, $$.tipo) + ";\n";
+        insere_var_ts($$.valor, $$.tipo);
       }
     ;
 
 
-// Permite declaracoes como tipo a, b, c, d;
 VAR_DEFS  : TK_ID ',' VAR_DEFS
             {
               $$.lista_str.push_back($1.valor);
-              $$.lista_str.insert($$.lista_str.end(),
-                                  $3.lista_str.begin(),
-                                  $3.lista_str.end());
+              $$.lista_str.insert($$.lista_str.end(), $3.lista_str.begin(), $3.lista_str.end());
             }
-          | TK_ID
-            {
-              $$.lista_str.push_back($1.valor);
-            }
+          | TK_ID { $1.lista_str.push_back($1.valor); }
           ;
 
 ATRIB : TK_ID TK_ATRIB E
         {
           $1.tipo = consulta_ts($1.valor);
-          $$.codigo = atribuicao_var($1, $3);
+          $$.codigo = atribui_var($1, $3);
         }
       | TK_ID '[' E ']' TK_ATRIB E
         {
@@ -233,19 +251,17 @@ ATRIB : TK_ID TK_ATRIB E
       | TK_ID '[' E ']' '[' E ']' TK_ATRIB E
         {
           // Chama o teste de limites antes de mais nada.
-          string teste_limites = gera_teste_limite_matriz($1, $3, $6);
-          string indice_temp = gera_nome_var_temp("i");
-          string multi_temp = gera_nome_var_temp("i");
-
+          string limites_matriz = gera_teste_limite_matriz($1, $3, $6);
+          string id_temp = gera_nome_var_temp("i");
 
           Tipo t_matriz = consulta_ts($1.valor);
           $$.codigo = $3.codigo + $6.codigo + $9.codigo
-                    + "  " + multi_temp + " = " + $3.valor + "*"
+                    + "  " + id_temp + " = " + $3.valor + "*"
                     + toString(t_matriz.tam[1]) + ";\n"
-                    + "  " + indice_temp + " = "
-                    + multi_temp + " + " + $6.valor + ";\n"
-                    + teste_limites
-                    + "  " + $1.valor + "[" + indice_temp
+                    + "  " + id_temp + " = "
+                    + id_temp + " + " + $6.valor + ";\n"
+                    + limites_matriz
+                    + "  " + $1.valor + "[" + id_temp
                     + "] = " + $9.valor + ";\n";
         }
       ;
@@ -285,31 +301,13 @@ TIPO  : TK_INT
       // e.g., Vector, Struct
       ;
 
-FUNCTION : TIPO TK_ID '(' F_PARAMS ')' BLOCO
-       ;
-
-F_PARAMS : PARAMS
-         |
-         ;
-
-PARAMS : PARAMS ',' PARAM
-       | PARAM
-       ;
-
-PARAM : TIPO TK_ID
-      | TIPO TK_ID '[' E ']'
-      | TIPO TK_ID '[' E ']' '[' E ']'
-      |
-      ;
-
-
-BLOCO : TK_BEGIN { vars_bloco.push_back(""); } CMDS TK_END
+BLOCO : TK_BEGIN { block_vars.push_back(""); } CMDS TK_END
         {
           $$.codigo = "{\n";
           // Adiciona as variaveis desse bloco ao inicio do mesmo e
           // desempilha a lista de variaveis desse bloco.
-          $$.codigo += vars_bloco[vars_bloco.size()-1];
-          vars_bloco.pop_back();
+          $$.codigo += block_vars[block_vars.size()-1];
+          block_vars.pop_back();
           $$.codigo += $3.codigo + "}\n";
         }
       ;
@@ -406,18 +404,16 @@ CMD_FOR : TK_FOR '(' BEGIN_FOR ';' E ';' CONT_FOR ')' SUB_BLOCO
  BEGIN_FOR : TIPO TK_ID TK_ATRIB E
              {
                $$ = Atributos($2.valor, $1.tipo);
-               vars_bloco[vars_bloco.size()-1] += "  "
-                                               + declara_variavel($2.valor, $1.tipo)
-                                               + ";\n";
-               insere_ts($2.valor, $1.tipo);
+               block_vars[block_vars.size()-1] += "  " + declara_variavel($2.valor, $1.tipo) + ";\n";
+               insere_var_ts($2.valor, $1.tipo);
                $2.tipo = $1.tipo;
-               $$.codigo = atribuicao_var($2, $4);
+               $$.codigo = atribui_var($2, $4);
              }
              //fazer pra nao precisar colocar o tipo no inicio
             | TK_ID TK_ATRIB E
               {
                 $$ = Atributos($1.valor, consulta_ts($1.valor));
-                $$.codigo = atribuicao_var($1, $3);
+                $$.codigo = atribui_var($1, $3);
               }
            ;
 
@@ -442,66 +438,21 @@ CMD_DOWHILE : TK_DO SUB_BLOCO TK_WHILE '(' E ')'
               }
              ;
 
-E : E '+' E
-    {
-      $$ = gera_codigo_operador($1, "+", $3);
-    }
-  | E '-' E
-    {
-      $$ = gera_codigo_operador($1, "-", $3);
-    }
-  | E '*' E
-    {
-      $$ = gera_codigo_operador($1, "*", $3);
-    }
-  | E '/' E
-    {
-      $$ = gera_codigo_operador($1, "/", $3);
-    }
-  | E TK_G E
-    {
-      $$ = gera_codigo_operador($1, ">", $3);
-    }
-  | E TK_L E
-    {
-      $$ = gera_codigo_operador($1, "<", $3);
-    }
-  | E TK_GE E
-    {
-      $$ = gera_codigo_operador($1, ">=", $3);
-    }
-  | E TK_LE E
-    {
-      $$ = gera_codigo_operador($1, "<=", $3);
-    }
-  | E TK_DIFF E
-    {
-      $$ = gera_codigo_operador($1, "!=", $3);
-    }
-  | E TK_E E
-    {
-      $$ = gera_codigo_operador($1, "==", $3);
-    }
-  | E TK_AND E
-    {
-      $$ = gera_codigo_operador($1, "&&", $3);
-    }
-  | E TK_OR E
-    {
-      $$ = gera_codigo_operador($1, "||", $3);
-    }
-  | E TK_MOD E
-    {
-      $$ = gera_codigo_operador($1, "%", $3);
-    }
-  | TK_NOT E
-    {
-      $$ = gera_codigo_operador_unario("!", $2);
-    }
-  | '(' E ')'
-    {
-      $$ = $2;
-    }
+E : E '+' E     { $$ = gera_codigo_operador($1, "+", $3);    }
+  | E '-' E     { $$ = gera_codigo_operador($1, "-", $3);    }
+  | E '*' E     { $$ = gera_codigo_operador($1, "*", $3);    }
+  | E '/' E     { $$ = gera_codigo_operador($1, "/", $3);    }
+  | E TK_G E    { $$ = gera_codigo_operador($1, ">", $3);    }
+  | E TK_L E    { $$ = gera_codigo_operador($1, "<", $3);    }
+  | E TK_GE E   { $$ = gera_codigo_operador($1, ">=", $3);   }
+  | E TK_LE E   { $$ = gera_codigo_operador($1, "<=", $3);   }
+  | E TK_DIFF E { $$ = gera_codigo_operador($1, "!=", $3);   }
+  | E TK_E E    { $$ = gera_codigo_operador($1, "==", $3);   }
+  | E TK_AND E  { $$ = gera_codigo_operador($1, "&&", $3);   }
+  | E TK_OR E   { $$ = gera_codigo_operador($1, "||", $3);   }
+  | E TK_MOD E  { $$ = gera_codigo_operador($1, "%", $3);    }
+  | TK_NOT E    { $$ = gera_codigo_operador_unario("!", $2); }
+  | '(' E ')'   { $$ = $2;                                   }
   | F
   ;
 
@@ -554,9 +505,8 @@ F : TK_ID
   | TK_ID '[' E ']' '[' E ']'
     {
       // Chama o teste de limites antes de mais nada.
-      string teste_limites = gera_teste_limite_matriz($1, $3, $6);
-      string indice_temp = gera_nome_var_temp("i");
-      string multi_temp = gera_nome_var_temp("i");
+      string limites_matriz = gera_teste_limite_matriz($1, $3, $6);
+      string id_temp = gera_nome_var_temp("i");
 
       Tipo t_matriz = consulta_ts($1.valor);
 
@@ -564,13 +514,13 @@ F : TK_ID
       $$.valor = gera_nome_var_temp($$.tipo.tipo_base);
 
 
-      $$.codigo = $3.codigo + $6.codigo + teste_limites
-                + "  " + multi_temp + " = " + $3.valor + "*"
+      $$.codigo = $3.codigo + $6.codigo + limites_matriz
+                + "  " + id_temp + " = " + $3.valor + "*"
                 + toString(t_matriz.tam[1]) + ";\n"
-                + "  " + indice_temp + " = "
-                + multi_temp + " + " + $6.valor + ";\n"
+                + "  " + id_temp + " = "
+                + id_temp + " + " + $6.valor + ";\n"
                 + "  " + $$.valor + " = " + $1.valor
-                + "[" + indice_temp + "];\n";
+                + "[" + id_temp + "];\n";
     }
   | BOOL
 
@@ -639,8 +589,8 @@ void inicializa_operadores() {
   tipo_opr["d/i"] = "d";
   tipo_opr["d/d"] = "d";
 
-  // TODO(jullytta): comparacao de strings
-  // Operadores: <>, ==, >, <, <=, >=
+
+  // Operadores: !=, ==, >, <, <=, >=
   // Operador >
   tipo_opr["i>i"] = "b";
   tipo_opr["i>d"] = "b";
@@ -686,7 +636,7 @@ void inicializa_operadores() {
   tipo_opr["i==c"] = "b";
   tipo_opr["c==i"] = "b";
 
-  // Operador <>
+  // Operador !=
   tipo_opr["i!=i"] = "b";
   tipo_opr["i!=d"] = "b";
   tipo_opr["d!=i"] = "b";
@@ -705,21 +655,21 @@ void inicializa_operadores() {
   tipo_opr["s=s"] = "s";
   tipo_opr["s=c"] = "s";
 
-  // Operador e
+  // Operador and
   tipo_opr["b&&b"] = "b";
   tipo_opr["i&&i"] = "b";
   tipo_opr["i&&d"] = "b";
   tipo_opr["d&&i"] = "b";
   tipo_opr["d&&d"] = "b";
 
-  // Operador ou
+  // Operador or
   tipo_opr["b||b"] = "b";
   tipo_opr["i||i"] = "b";
   tipo_opr["i||d"] = "b";
   tipo_opr["d||i"] = "b";
   tipo_opr["d||d"] = "b";
 
-  // Operador naum
+  // Operador not
   tipo_opr["!i"] = "i";
   tipo_opr["!b"] = "b";
   tipo_opr["!c"] = "c";
@@ -730,7 +680,7 @@ void inicializa_operadores() {
 
 }
 
-void insere_ts(string nome, Tipo tipo){
+void insere_var_ts(string nome, Tipo tipo){
   if(ts.find(nome) != ts.end()){
     erro("Variavel ja declarada: " + nome);
   }
@@ -756,12 +706,9 @@ string declara_variavel(string nome, Tipo tipo){
   if(tipo.tipo_base == "s"){
     int tam = MAX_STRING_SIZE;
     if(tipo.ndim == 1)
-      return traduz_interno_para_C(tipo.tipo_base)
-                + " " + nome + "[" + toString(tipo.tam[0]*tam) + "]";
+      tam *= tipo.tam[0];
     if(tipo.ndim == 2)
-      return traduz_interno_para_C(tipo.tipo_base)
-              + " " + nome + "[" + toString(tipo.tam[1]*tam) + "]";
-
+      tam*=tipo.tam[1];
     return "char " + nome + "[" + toString(tam) + "]";
   }
   if(tipo.ndim == 1)
@@ -773,6 +720,7 @@ string declara_variavel(string nome, Tipo tipo){
 
   return traduz_interno_para_C(tipo.tipo_base) + " " + nome;
 }
+
 
 string traduz_interno_para_C(string interno){
   if(interno == "i")
@@ -831,7 +779,7 @@ string gera_nome_var_temp(string tipo_interno){
   static int n = 1;
   string nome = "t" + tipo_interno + "_" + toString(n++);
 
-  vars_bloco[vars_bloco.size()-1] += "  "
+  block_vars[block_vars.size()-1] += "  "
                                   + declara_variavel(nome, Tipo(tipo_interno))
                                   + ";\n";
 
@@ -872,7 +820,7 @@ string gera_teste_limite_matriz(Atributos id, Atributos indice1, Atributos indic
   return "";
 }
 
-string atribuicao_var(Atributos s1, Atributos s3){
+string atribui_var(Atributos s1, Atributos s3){
   if (is_atribuivel(s1, s3) == 1){
     if (s1.tipo.tipo_base == "s"){
        return s3.codigo + "  strncpy("+ s1.valor + ", " + s3.valor +", "

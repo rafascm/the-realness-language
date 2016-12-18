@@ -1,6 +1,6 @@
 all: trabalho entrada.pas
 	./trabalho < entrada.pas > gerado.cc
-	##./gabarito < gerado.cc
+	#./gabarito < gerado.cc
 	g++ -o saida gerado.cc
 	./saida
 

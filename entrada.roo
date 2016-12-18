@@ -1,82 +1,24 @@
 The library is officially open
 because reading is? FUNDAMENTAL;
 
+int a;
 
-The Realness {
-  /*int a;
-	int array[3];
-  */
-  /*for(int as = 0; as < 3; as = as +1){
-    array[as] = 2+as;
-  }
-  for(int am = 0; am < 3; am = am +1){
-    wroteU(array[am]);
-  }*/
-  /*int res;
-  res = mdc(32,48);
-*/
-	/*int matriz[3][3];
+The Realness <shantay u stay>
+  char mat[2][2];
 
-	for(int i = 0; i < 3; i = i+1){
-    for(int j = 0; j < 3; j = j + 1){
-      matriz[i][j] = 3*i + j;
-    }
-  }
+  for(int i=0;i<2;i=i+1) <shantay u stay>
+    for(int j=0;j<2;j=j+1) <shantay u stay>
+      mat[i][j] = 'a';
+    </sashay away>
+  </sashay away>
 
-	for(int ai = 0; ai < 3; ai = ai + 1){
-		for(int aj = 0; aj < 2; aj = aj + 1){
-			wroteU(matriz[ai][aj]);
-		}
-	}*/
+  for(int ai=0;ai<2;ai=ai+1) <shantay u stay>
+    for(int aj=0;aj<2;aj=aj+1) <shantay u stay>
+      wroteU(mat[ai][aj]);
+    </sashay away>
+  </sashay away>
 
-
- /* double b,c;
-	string str;
-	char ch;
-	boolean xxx, yyy;
-	a=12; b = 2.0;
-	c = a * b;
-	ch = 'a';
-	xxx = all_T_all_shade;
-	yyy = (2.0 != 2);
-
-	if(a mod 3 == 1 and a mod 4 == 0) wroteU("a e divisivel por 3");
-	if(not yyy) wroteU("testando operador not");
-	wroteU(xxx);
-	xxx = yyy;
-	wroteU(xxx);
-
-str = "sup, bro!";
-  wroteU(50+60+70);
-  wroteU("Fala que eu repito!");
-  string leituras;
-  readU(leituras);
-  wroteU("Voce disse:");
-  wroteU(leituras);
-  int li;
-  wroteU("Entra com um numero agora vai:");
-  readU(li);
-  int x;
-  x = 0;
-  while (x < 10){
-    x = x + 1;
-    wroteU("Enquanto funciona, viado!");
-    wroteU(x);
-  }
-  int h;
-  h = 10;
-  do{
-    h = h-1;
-    wroteU("Do while funciona!");
-    wroteU(h);
-  }while(h > 0);
-  for(int i = 0; i < 10; i = i+1){
-    wroteU("For: ");
-    wroteU(i);
-  }
-	str = str + " oioi";
-	wroteU(str);
-*/
-}
+  wroteU("ola");
+</sashay away>
 
 The library is officially closed;
