@@ -10,7 +10,7 @@ boolean t;
 
 The Realness <shantay u stay>
 
-double x[2];
+int x[2];
 double z[3];
 
 x[0]=0;
@@ -19,11 +19,16 @@ z[0]=0;
 z[1]=1;
 z[2]=2;
 
-if(x@z)
+if(1 in x)
+  wroteU("ta dentro");
+else
+  wroteU("nao ta dentro");
+
+/*if(x@z)
   wroteU("igual");
 else
   wroteU("diferente");
-
+*/
 /*
   te = "oiaa";
   string aa = "oiaa";

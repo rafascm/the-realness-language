@@ -25,7 +25,6 @@ COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 "double"               {                               return TK_DOUBLE;  }
 "string"               {                               return TK_STRING;  }
 "boolean"              {                               return TK_BOOL;    }
-"void"                 {                               return TK_VOID;    }
 
 
 
@@ -42,11 +41,9 @@ COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 "for"                  { yylval = Atributos( yytext ); return TK_FOR;     }
 "while"                { yylval = Atributos( yytext ); return TK_WHILE;   }
 "do"                   { yylval = Atributos( yytext ); return TK_DO;      }
-"choices"              { yylval = Atributos( yytext ); return TK_SWITCH;  }
-"thankyou"             { yylval = Atributos( yytext ); return TK_BREAK;   }
 
 
-"in"                   { yylval = Atributos( yytext ); return TK_IN;   }
+"in"                   { yylval = Atributos( yytext ); return TK_IN;      }
 "="                    { yylval = Atributos( yytext ); return TK_ATRIB;   }
 "<="                   { yylval = Atributos( yytext ); return TK_LE;      }
 ">="                   { yylval = Atributos( yytext ); return TK_GE;      }
@@ -65,12 +62,12 @@ COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 "The library is officially closed" {
                          yylval = Atributos( yytext ); return TK_STOP;    }
 
-{CSTRING}  { yylval = Atributos(yytext, Tipo("string"));    return TK_CSTRING; }
-{CCHAR}    { yylval = Atributos(yytext, Tipo("char"));      return TK_CCHAR;   }
-{ID}       { yylval = Atributos(renomeia_variavel_usuario(yytext));
+{CSTRING}  { yylval = Atributos(yytext, Type("string"));    return TK_CSTRING; }
+{CCHAR}    { yylval = Atributos(yytext, Type("char"));      return TK_CCHAR;   }
+{ID}       { yylval = Atributos(rename_user_var(yytext));
                                                             return TK_ID;      }
-{INT}      { yylval = Atributos(yytext, Tipo("int"));       return TK_CINT;    }
-{DOUBLE}   { yylval = Atributos(yytext, Tipo("double"));    return TK_CDOUBLE; }
+{INT}      { yylval = Atributos(yytext, Type("int"));       return TK_CINT;    }
+{DOUBLE}   { yylval = Atributos(yytext, Type("double"));    return TK_CDOUBLE; }
 
 .          { yylval = Atributos( yytext );                  return *yytext;    }
 
