@@ -16,3 +16,5 @@ Stay Foxy , UON UON :p
     - the operators **!= < > ==** are defined for strings as well. It is also possible to concat strings using the operator **+**.
     - the operator **in** is defined only when the *var* in the right is an array, uni or bidimensional.
     - the commands known as **readU** and **wroteU** are the ***The Realness*** version of cin/cout
+
+#### This language was inspired by the slangs used on RuPaul's Drag Race
