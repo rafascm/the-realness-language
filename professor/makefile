@@ -1,6 +1,6 @@
-all: trabalho entrada.roo
-	./trabalho < entrada.roo > gerado.cc
-	#./gabarito < gerado.cc
+all: trabalho entrada.pas
+	./trabalho < entrada.pas > gerado.cc
+	##./gabarito < gerado.cc
 	g++ -o saida gerado.cc
 	./saida
 
@@ -11,4 +11,4 @@ y.tab.c: trabalho.y
 	yacc -v trabalho.y
 
 trabalho: lex.yy.c y.tab.c
-	g++ -o trabalho y.tab.c -lfl
+	g++ -std=c++11 -o trabalho y.tab.c -lfl

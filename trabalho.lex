@@ -1,19 +1,15 @@
-%{
 
-char* troca_aspas( char* lexema );
-
-%}
 
 DELIM   [\t ]
 LINHA   [\n]
 NUMERO  [0-9]
-LETRA   [A-Za-z_]
+LETRA   [a-zA-Z_]
 INT     {NUMERO}+
 DOUBLE  {NUMERO}+("."{NUMERO}+)?
 ID      {LETRA}({LETRA}|{NUMERO})*
-CSTRING "'"([^\n']|"''")*"'"
-
-COMMENT "(*"([^*]|"*"[^)])*"*)"
+CSTRING \"(\\.|[^\\"])*\"
+CCHAR   ['][^\n'][']
+COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 
 %%
 
@@ -21,42 +17,60 @@ COMMENT "(*"([^*]|"*"[^)])*"*)"
 {DELIM}    {}
 {COMMENT}  {}
 
-"CategoryIs"  { yylval = Atributos( yytext ); return TK_PROGRAM; }
-"Shantay"       { yylval = Atributos( yytext ); return TK_BEGIN; }
-"Sashay"         { yylval = Atributos( yytext ); return TK_END; }
-"WroteU"     { yylval = Atributos( yytext ); return TK_WRITELN; }
-"If"          { yylval = Atributos( yytext ); return TK_IF; }
-"Then"        { yylval = Atributos( yytext ); return TK_THEN; }
-"Else"        { yylval = Atributos( yytext ); return TK_ELSE; }
-"For"         { yylval = Atributos( yytext ); return TK_FOR; }
-"To"          { yylval = Atributos( yytext ); return TK_TO; }
-"Do"          { yylval = Atributos( yytext ); return TK_DO; }
-"Array"       { yylval = Atributos( yytext ); return TK_ARRAY; }
-"Of"          { yylval = Atributos( yytext ); return TK_OF; }
-"The Library is Officially Open\nBecause Reading is ? FUNDAMENTAL" { yylval = Atributos( yytext ); return TK_ABRIR1; }
-"The Library is Officially Closed" { yylval = Atributos( yytext ); return TK_FECHAR; }
-".."       { yylval = Atributos( yytext ); return TK_PTPT; }
-"="       { yylval = Atributos( yytext ); return TK_ATRIB; }
-"<="       { yylval = Atributos( yytext ); return TK_MEIG; }
-">="       { yylval = Atributos( yytext ); return TK_MAIG; }
-"<>"       { yylval = Atributos( yytext ); return TK_DIF; }
-"And"      { yylval = Atributos( yytext ); return TK_AND; }
+"all_T_all_shade"      {                               return TK_TRUE;    }
+"no_T_no_shade"        {                               return TK_FALSE;   }
+
+"int"                  {                               return TK_INT;     }
+"char"                 {                               return TK_CHAR;    }
+"double"               {                               return TK_DOUBLE;  }
+"string"               {                               return TK_STRING;  }
+"boolean"              {                               return TK_BOOL;    }
+"void"                 {                               return TK_VOID;    }
 
 
-{CSTRING}  { yylval = Atributos( troca_aspas( yytext ), Tipo( "string" ) );
-             return TK_CSTRING; }
-{ID}       { yylval = Atributos( yytext ); return TK_ID; }
-{INT}      { yylval = Atributos( yytext, Tipo( "int" ) ); return TK_CINT; }
-{DOUBLE}   { yylval = Atributos( yytext, Tipo( "double" ) ); return TK_CDOUBLE; }
 
-.          { yylval = Atributos( yytext ); return *yytext; }
+"The Realness"         { yylval = Atributos( yytext ); return TK_MAIN;    }
+"{"                    { yylval = Atributos( yytext ); return TK_BEGIN;   }
+"}"                    { yylval = Atributos( yytext ); return TK_END;     }
+"ret"                  { yylval = Atributos( yytext ); return TK_RETURN;  }
+
+"wroteU"               { yylval = Atributos( yytext ); return TK_WRITE;   }
+"readU"                { yylval = Atributos(yytext);   return TK_READ;    }
+
+"if"                   { yylval = Atributos( yytext ); return TK_IF;      }
+"else"                 { yylval = Atributos( yytext ); return TK_ELSE;    }
+"for"                  { yylval = Atributos( yytext ); return TK_FOR;     }
+"while"                { yylval = Atributos( yytext ); return TK_WHILE;   }
+"do"                   { yylval = Atributos( yytext ); return TK_DO;      }
+"choices"              { yylval = Atributos( yytext ); return TK_SWITCH;  }
+"thankyou"             { yylval = Atributos( yytext ); return TK_BREAK;}
+
+
+"="                    { yylval = Atributos( yytext ); return TK_ATRIB;   }
+"<="                   { yylval = Atributos( yytext ); return TK_LE;      }
+">="                   { yylval = Atributos( yytext ); return TK_GE;      }
+"=="                   { yylval = Atributos( yytext ); return TK_E;       }
+"<"                    { yylval = Atributos( yytext ); return TK_L;       }
+">"                    { yylval = Atributos( yytext ); return TK_G;       }
+"!="                   { yylval = Atributos( yytext ); return TK_DIFF;    }
+
+"and"                  { yylval = Atributos( yytext ); return TK_AND;     }
+"or"                   { yylval = Atributos( yytext ); return TK_OR;      }
+"not"                   { yylval = Atributos( yytext ); return TK_NOT;     }
+"mod"                  { yylval = Atributos( yytext ); return TK_MOD;     }
+
+"The library is officially open\nbecause reading is? FUNDAMENTAL" {
+                         yylval = Atributos( yytext ); return TK_START;   }
+"The library is officially closed" {
+                         yylval = Atributos( yytext ); return TK_STOP;    }
+
+{CSTRING}  { yylval = Atributos(yytext, Tipo("string"));    return TK_CSTRING; }
+{CCHAR}    { yylval = Atributos(yytext, Tipo("char"));      return TK_CCHAR;   }
+{ID}       { yylval = Atributos(renomeia_variavel_usuario(yytext));
+                                                            return TK_ID;      }
+{INT}      { yylval = Atributos(yytext, Tipo("int"));       return TK_CINT;    }
+{DOUBLE}   { yylval = Atributos(yytext, Tipo("double"));    return TK_CDOUBLE; }
+
+.          { yylval = Atributos( yytext );                  return *yytext;    }
 
 %%
-
-char* troca_aspas( char* lexema ) {
-  int n = strlen( lexema );
-  lexema[0] = '"';
-  lexema[n-1] = '"';
-
-  return lexema;
-}
