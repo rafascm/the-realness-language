@@ -68,7 +68,7 @@ struct Type {
 
   Type(){}
 
-  // Cria variavel basica
+
   Type (string type){
     base_type = type;
     ndim = 0;
@@ -143,10 +143,7 @@ S : TK_START ';' DECLS MAIN TK_STOP ';'
     }
   ;
 
-MAIN  : TK_MAIN BLOCO
-        {
-          $$.codigo += "int main()" + $2.codigo;
-        }
+MAIN  : TK_MAIN BLOCO { $$.codigo += "int main()" + $2.codigo; }
       |
       ;
 
@@ -160,23 +157,6 @@ DECLS : DECLS DECL
       ;
 
 DECL : G_VAR ';'
-     | FUNCTION
-     ;
-
-FUNCTION : TIPO TK_ID '(' F_PARAMS ')' BLOCO
-      ;
-
-F_PARAMS : PARAMS
-        ;
-
-PARAMS : PARAM ',' PARAMS
-      | PARAM
-      ;
-
-PARAM : TIPO TK_ID
-     | TIPO TK_ID '[' E ']'
-     | TIPO TK_ID '[' E ']' '[' E ']'
-     |
      ;
 
 G_VAR : TIPO TK_ID
@@ -251,7 +231,6 @@ ATRIB : TK_ID TK_ATRIB E
         }
       | TK_ID '[' E ']' '[' E ']' TK_ATRIB E
         {
-          // Chama o teste de limites antes de mais nada.
           string limites_matriz = matrix_limit_test_generator($1, $3, $6);
           string id_temp = vartmp_name_generator("i");
 
@@ -272,8 +251,6 @@ TIPO  : TK_INT             { Type t("i"); $$ = Atributos("int", t);    }
 BLOCO : TK_BEGIN { block_vars.push_back(""); } CMDS TK_END
         {
           $$.codigo = "{\n";
-          // Adiciona as variaveis desse bloco ao inicio do mesmo e
-          // desempilha a lista de variaveis desse bloco.
           $$.codigo += block_vars[block_vars.size()-1];
           block_vars.pop_back();
           $$.codigo += $3.codigo + "}\n";
@@ -297,17 +274,14 @@ CMDS  : CMD CMDS
 CMD : CMD_WROTEU ';'
     | CMD_READU ';'
     | CMD_RETURN ';'
-    | CMD_CALL ';'
-    | CMD_IF       // nao tem ponto e virgula
+    | CMD_IF
     | CMD_FOR
     | CMD_WHILE
     | CMD_DOWHILE ';'
-    | ATRIB ';'   // Atribuicoes locais
-    | VAR ';'  { $$ = $1; }    // Variaveis locais
+    | ATRIB ';'
+    | VAR ';'  { $$ = $1; }
     ;
 
-// Precisa adicionar IF, WHILE, DO, FOR aqui
-// Porem nao pode ser CMD pq nao tem ;
 
 CMD_WROTEU : TK_WRITE '(' E ')'
              {
@@ -324,8 +298,6 @@ CMD_READU : TK_READ '(' TK_ID ')'
                }
              ;
 
-// type da pra dar flwvlw em qualquer parte do codigo
-// porem o gabarito do zimbrao aceita return em qualquer parte do codigo
 CMD_RETURN : TK_RETURN
              {
                $$.codigo = $1.codigo + "  return 0;\n";
@@ -335,23 +307,6 @@ CMD_RETURN : TK_RETURN
                $$.codigo = $1.codigo + $3.codigo + "  return "+ $3.valor +";\n";
              }
            ;
-
-// Definindo a call de uma funcao
-CMD_CALL : TK_ID '(' CALL_PARAMS ')'
-// Chama uma funcao, precisa verificar se foi definida!
-         ;
-
-CALL_PARAMS : C_PARAMS
-            |
-            ;
-
-C_PARAMS : C_PARAMS ',' C_PARAM
-         | C_PARAM
-         ;
-
-C_PARAM : TK_ID
-        | TK_ID '[' E ']'
-        ;
 
 CMD_IF : TK_IF '(' E ')' CMD
          {
@@ -377,7 +332,7 @@ CMD_FOR : TK_FOR '(' BEGIN_FOR ';' E ';' CONT_FOR ')' SUB_BLOCO
                $2.type = $1.type;
                $$.codigo = atribui_var($2, $4);
              }
-             //fazer pra nao precisar colocar o type no inicio
+
             | TK_ID TK_ATRIB E
               {
                 $$ = Atributos($1.valor, check_ts($1.valor));
@@ -385,8 +340,7 @@ CMD_FOR : TK_FOR '(' BEGIN_FOR ';' E ';' CONT_FOR ')' SUB_BLOCO
               }
            ;
 
- // acho que pra verificar tipos isso fica melhor separado!
- CONT_FOR : TK_ID TK_ATRIB E
+  CONT_FOR : TK_ID TK_ATRIB E
             {
               $$.codigo = $3.codigo + "\n" + "  "
                         + $1.valor + " = " + $3.valor + ";\n";
@@ -474,7 +428,6 @@ F : TK_ID
     }
   | TK_ID '[' E ']' '[' E ']'
     {
-      // Chama o teste de limites antes de mais nada.
       string limites_matriz = matrix_limit_test_generator($1, $3, $6);
       string id_temp = vartmp_name_generator("i");
 
@@ -718,7 +671,7 @@ string translate_intern_C(string interno){
     return "double";
   if(interno == "s")
     return "char";
-  erro("Bug no compilador! Type interno inexistente: " + interno);
+  erro("Type interno inexistente: " + interno);
   return "";
 }
 
@@ -746,8 +699,6 @@ string translate_intern_realness(string interno){
     return "boolean";
   if(interno == "d")
     return "double";
-  if(interno == "v")
-    return "void";
   if(interno == "s")
     return "string";
   erro("Type interno " + interno + " inexistente");
@@ -790,14 +741,12 @@ string array_limit_test_generator( string indice_1, Type tipoArray ) {
 string matrix_limit_test_generator(Atributos id, Atributos indice1, Atributos indice2){
   Type t_matriz = check_ts(id.valor);
 
-  // Verifica o type dos indices
   if(indice1.type.base_type != "i" || indice2.type.base_type != "i" ||
      indice1.type.ndim != 0 || indice2.type.ndim != 0)
-    erro("Indice de arrei deve ser intero.");
+    erro("indice tem que ser inteiro");
 
-  // Verifica se a variavel e' mesmo um array de dimensao 2
   if(t_matriz.ndim != 2)
-    erro("Variavel " + id.valor + " nao e' arrei de dimensao dois.");
+    erro(id.valor + " nao é matriz.");
 
   return "";
 }
@@ -808,7 +757,7 @@ string atribui_var(Atributos s1, Atributos s3){
        return s3.codigo + "  strncpy("+ s1.valor + ", " + s3.valor +", "
                         + toString(MAX_STRING_SIZE) + ");\n";
     } else if (s1.type.base_type == "b" && s3.type.base_type == "i") {
-      string val = (s3.valor == "0" ? "0" : "1"); //lida com b=i
+      string val = (s3.valor == "0" ? "0" : "1");
       return s3.codigo + "  " + s1.valor + " = " + val + ";\n";
     } else {
       return s3.codigo + "  " + s1.valor + " = " + s3.valor + ";\n";
@@ -822,8 +771,7 @@ string atribui_var(Atributos s1, Atributos s3){
 
 string atribuicao_array(Atributos s1, Atributos pos, Atributos s3){
   if (is_atribuivel(s1,s3) == 1) {
-      return pos.codigo + s3.codigo +
-             "  " + s1.valor + "[" + pos.valor + "] = " + s3.valor + ";\n";
+      return pos.codigo + s3.codigo + "  " + s1.valor + "[" + pos.valor + "] = " + s3.valor + ";\n";
   }
   else{
     erro("Atribuicao nao permitida!");
@@ -836,12 +784,9 @@ string std_reading(Atributos s3){
   string codigo;
   string indice_pula_linha = vartmp_name_generator("i");
   if (s3.type.base_type == "s"){
-    codigo = s3.codigo + "  fgets(" + s3.valor
-                       + ", " + toString(MAX_STRING_SIZE) + ", stdin);\n"
-                       + "  " + indice_pula_linha + " = strcspn(" + s3.valor
-                       + ", \"\\n\");\n"
-                       + "  " + s3.valor + "[" + indice_pula_linha
-                       + "] = 0;\n";
+    codigo = s3.codigo + "  fgets(" + s3.valor + ", " + toString(MAX_STRING_SIZE) + ", stdin);\n"
+                       + "  " + indice_pula_linha + " = strcspn(" + s3.valor + ", \"\\n\");\n"
+                       + "  " + s3.valor + "[" + indice_pula_linha + "] = 0;\n";
   } else{
     codigo = s3.codigo + "  cin >> " + s3.valor +  ";\n";
   }
@@ -897,10 +842,7 @@ Atributos opr_code_generator(Atributos s1, string opr, Atributos s3){
   string tipo_resultado = type_opr[tipo1 + opr + tipo3];
 
   if(tipo_resultado == "")
-    erro("Operacao nao permitida. "
-       + translate_intern_realness(tipo1)
-       + " " + opr + " "
-       + translate_intern_realness(tipo3));
+    erro("Operacao nao permitida. " + translate_intern_realness(tipo1) + " " + opr + " " + translate_intern_realness(tipo3));
 
   ss.valor = vartmp_name_generator(tipo_resultado);
   ss.type = Type(tipo_resultado);
@@ -951,11 +893,8 @@ Atributos opr_code_generator(Atributos s1, string opr, Atributos s3){
     ss.codigo += "  " + ss.valor + " = !" + ss.valor + ";\n";
   }
 
-  // Type basico
   else {
-    ss.codigo += "  " + ss.valor + " = "
-              + s1.valor + " " + opr + " " + s3.valor
-              + ";\n";
+    ss.codigo += "  " + ss.valor + " = " + s1.valor + " " + opr + " " + s3.valor + ";\n";
   }
   return ss;
 }
@@ -990,16 +929,10 @@ Atributos in_opr_code_generator(Atributos var, string opr, Atributos array){
       string label_not_in = label_generator("not_in");
       string var_temp = vartmp_name_generator(tipo1);
 
-      ss.codigo += var.codigo + array.codigo
-                    + "  " + array_temp + " = " + array_valor + ";\n"
-                    + "  " + var_temp + " = " + var.valor
-                    + " == " + array_temp + ";\n"
-                    + "  " + var_temp + " = !" + var_temp + ";\n"
-                    + "  if ("+ var_temp +") goto " + label_not_in + ";\n"
-                    + "    " + res + " = 1;\n"
-                    + "  goto " + label_in + ";\n"
-                    + label_not_in + ":;\n\n"
-                    ;
+      ss.codigo += var.codigo + array.codigo + "  " + array_temp + " = " + array_valor + ";\n"
+                    + "  " + var_temp + " = " + var.valor + " == " + array_temp + ";\n"
+                    + "  " + var_temp + " = !" + var_temp + ";\n" + "  if ("+ var_temp +") goto " + label_not_in + ";\n"
+                    + "    " + res + " = 1;\n" + "  goto " + label_in + ";\n" + label_not_in + ":;\n\n";
       }
       ss.codigo += label_in + ":;\n";
       ss.valor = res;
@@ -1017,16 +950,12 @@ Atributos un_opr_code_generator(string opr, Atributos s2){
   string tipo_resultado = type_opr[opr + tipo2];
 
   if(tipo_resultado == "")
-    erro("Operacao nao permitida. "
-       + opr + translate_intern_realness(tipo2));
+    erro("Operacao nao permitida. " + opr + translate_intern_realness(tipo2));
 
   ss.valor = vartmp_name_generator(tipo_resultado);
   ss.type = Type(tipo_resultado);
 
-  ss.codigo = s2.codigo + "  "
-            + ss.valor + " = "
-            + opr + s2.valor
-            + ";\n";
+  ss.codigo = s2.codigo + "  " + ss.valor + " = " + opr + s2.valor + ";\n";
 
   return ss;
 }
@@ -1036,16 +965,9 @@ Atributos if_code_generator(Atributos expr, string cmd_then, string cmd_else){
   Atributos ss;
   string label_else = label_generator( "else" );
   string label_end = label_generator( "end" );
-//string condicao_var = vartmp_name_generator(expr.type.base_type);
 
-  ss.codigo = expr.codigo +
-         "  " + expr.valor + " = !" + expr.valor + ";\n\n" +
-         "  if( " + expr.valor + " ) goto " + label_else + ";\n" +
-         cmd_then +
-         "  goto " + label_end + ";\n" + "  " +
-         label_else + ":;\n" +
-         cmd_else + "  " +
-         label_end + ":;\n";
+  ss.codigo = expr.codigo + "  " + expr.valor + " = !" + expr.valor + ";\n\n" + "  if( " + expr.valor + " ) goto " + label_else + ";\n" +
+         cmd_then + "  goto " + label_end + ";\n" + "  " + label_else + ":;\n" + cmd_else + "  " + label_end + ":;\n";
   return ss;
 }
 
@@ -1053,17 +975,12 @@ Atributos while_code_generator(Atributos expr, Atributos bloco){
   Atributos ss;
   string label_teste = label_generator( "teste_while" );
   string label_end = label_generator( "fim_while" );
-  // o zizi coloca "b" ao inves de base_type, mas acho base_type melhor pra verificar erros
+
   string condicao_var = vartmp_name_generator(expr.type.base_type);
 
-  ss.codigo = label_teste + ":;\n"
-            + expr.codigo + "  "
-            + condicao_var + " = !" + expr.valor + ";\n\n"
-            + "if ("+ condicao_var +") goto " + label_end
-            + ";\n" + desbloquifica(bloco.codigo)
-            + "goto " + label_teste + ";\n"
-            + label_end + ":;\n"
-            ;
+  ss.codigo = label_teste + ":;\n" + expr.codigo + "  " + condicao_var + " = !" + expr.valor + ";\n\n"
+            + "if ("+ condicao_var +") goto " + label_end + ";\n" + desbloquifica(bloco.codigo)
+            + "goto " + label_teste + ";\n" + label_end + ":;\n";
   return ss;
 }
 
@@ -1071,16 +988,10 @@ Atributos do_while_code_generator(Atributos bloco, Atributos expr){
   Atributos ss;
   string label_teste = label_generator( "teste_dowhile" );
   string label_end = label_generator( "fim_dowhile" );
-  // o zizi coloca "b" ao inves de base_type, mas acho base_type melhor pra verificar erros
+
   string condicao_var = vartmp_name_generator(expr.type.base_type);
-  ss.codigo = label_teste + ":;\n"
-            + desbloquifica(bloco.codigo)
-            + expr.codigo + "  "
-            + condicao_var + " = !" + expr.valor + ";\n\n"
-            + "if ("+ condicao_var +") goto " + label_end + ";\n"
-            + "goto " + label_teste + ";\n"
-            + label_end + ":;\n"
-            ;
+  ss.codigo = label_teste + ":;\n" + desbloquifica(bloco.codigo) + expr.codigo + "  " + condicao_var + " = !" + expr.valor + ";\n\n"
+            + "if ("+ condicao_var +") goto " + label_end + ";\n" + "goto " + label_teste + ";\n" + label_end + ":;\n";
   return ss;
 }
 
@@ -1091,16 +1002,9 @@ Atributos for_code_generator(Atributos atrib, Atributos condicao, Atributos pulo
   string label_end = label_generator( "fim_for" );
   string condicao_var = vartmp_name_generator(condicao.type.base_type);
 
-  ss.codigo = atrib.codigo
-            + label_teste + ":;\n"
-            + condicao.codigo + "  "
-            + condicao_var + " = !" + condicao.valor + ";\n\n"
-            + "if ("+ condicao_var +") goto " + label_end
-            + ";\n" + desbloquifica(bloco.codigo)
-            + pulo.codigo
-            + "  goto " + label_teste + ";\n"
-            + label_end + ":;\n"
-            ;
+  ss.codigo = atrib.codigo + label_teste + ":;\n" + condicao.codigo + "  " + condicao_var + " = !" + condicao.valor + ";\n\n"
+            + "if ("+ condicao_var +") goto " + label_end + ";\n" + desbloquifica(bloco.codigo)
+            + pulo.codigo + "  goto " + label_teste + ";\n" + label_end + ":;\n";
   return ss;
 }
 

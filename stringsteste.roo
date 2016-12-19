@@ -1,0 +1,35 @@
+The library is officially open
+because reading is? FUNDAMENTAL;
+
+string nome_i;
+string u_nome;
+
+The Realness <shantay u stay>
+
+string greeting = "Hiiii!";
+
+/* Mostrando concatenacao de strings */
+wroteU("\n"+greeting + " Let's start some string testing!\n");
+wroteU("Tell me your first and last name :)");
+
+/* Mostrando entrada padrao */
+readU(nome_i); readU(u_nome);
+wroteU("\nWelcome " + nome_i + " " + u_nome + " to my reality.\n");
+
+wroteU("Showing string oprs == > < !=");
+
+string str1 = "Mama Ru";
+string str2 = "Ruzie Q";
+if(str1==str2)
+  wroteU(str1 +" == "+str2);
+else
+  wroteU(str1 +" != "+str2);
+if(str2>str1)
+  wroteU(str2 +" > "+str1);
+else
+  wroteU(str2 +" < "+str1);
+
+wroteU("");
+</sashay away>
+
+The library is officially closed;

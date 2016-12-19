@@ -1,5 +1,5 @@
-all: trabalho entrada.roo
-	./trabalho < entrada.roo > gerado.cc
+all: trabalho stringsteste.roo
+	./trabalho < stringsteste.roo > gerado.cc
 	./gabarito/gabarito < gerado.cc
 	g++ -o saida gerado.cc
 	./saida

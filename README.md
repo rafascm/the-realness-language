@@ -17,4 +17,9 @@ Stay Foxy , UON UON :p
     - the operator **in** is defined only when the *var* in the right is an array, uni or bidimensional.
     - the commands known as **readU** and **wroteU** are the ***The Realness*** version of cin/cout
 
+
+##### Para alterar os arquivos *.roo* compilados, altere o makefile linhas 1 e 2 substituindo os .roo pelo desejado
+
+by Pedro Caldas Coutinho and Rafael Mendes de Carvalho
+
 #### This language was inspired by the slangs used on RuPaul's Drag Race

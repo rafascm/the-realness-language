@@ -1,0 +1,44 @@
+The library is officially open
+because reading is? FUNDAMENTAL;
+
+The Realness <shantay u stay>
+
+int a[3][2];
+int b[2][3];
+int c[2][2];
+
+wroteU("\nHiiii! Let's start some matrix testing!\n");
+wroteU("O gabarito diz memory exhausted porque o código tem muitas linhas em C assembly\n");
+wroteU("Se retirar o loop para imprimir a matriz resultado, o gabarito retorna Aceito\n");
+
+/* Mostrando multiplicacao de matrizes */
+
+a[0][0]=1; a[0][1]=1;
+a[1][0]=1; a[1][1]=1;
+a[2][0]=1; a[2][1]=1;
+
+b[0][0]=2; b[0][1]=2; b[0][2]=2;
+b[1][0]=2; b[1][1]=2; b[1][2]=2;
+
+wroteU("Multiplying matrix a and b");
+wroteU("Where a [i][j]=1 and b[i][j]=2");
+wroteU("And finally c is the result a x b");
+
+for( int i = 0; i < 3; i=i+1 ) <shantay u stay>
+  for( int  j = 0; j < 3; j=j+1 ) <shantay u stay>
+    c[i][j] = 0;
+    for(int k = 0; k < 2; k=k+1 ) <shantay u stay>
+      c[i][j] = c[i][j] + a[i][k] * b[k][j];
+    </sashay away>
+  </sashay away>
+</sashay away>
+
+for( int ai = 0; ai < 3; ai=ai+1 ) <shantay u stay>
+  for( int  aj = 0; aj < 3; aj=aj+1 ) <shantay u stay>
+    wroteU(c[ai][aj]);
+  </sashay away>
+</sashay away>
+
+</sashay away>
+
+The library is officially closed;

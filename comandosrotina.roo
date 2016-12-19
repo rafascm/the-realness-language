@@ -1,0 +1,31 @@
+The library is officially open
+because reading is? FUNDAMENTAL;
+
+The Realness <shantay u stay>
+
+wroteU("\nHiiii! Let's start some for/while/dowhile testing!\n");
+
+/* Mostrando for/while/dowhile ao povoar os arrays e matrizes */
+int ai = 0;
+wroteU("Now testing a for inside a while");
+while(ai < 3) <shantay u stay>
+  wroteU("while count "); wroteU(ai);
+  for (int aj = 0; aj < 2; aj = aj + 1) <shantay u stay>
+    wroteU("inside for count"); wroteU(aj);
+  </sashay away>
+  ai = ai + 1;
+</sashay away>
+
+int bi = 0;
+wroteU("\nNow testing a for inside a do while");
+do <shantay u stay>
+  wroteU("do while count "); wroteU(bi);
+  for (int bj = 0; bj < 2; bj = bj + 1) <shantay u stay>
+    wroteU("inside for count "); wroteU(bj);
+  </sashay away>
+  bi = bi+1;
+</sashay away> while (bi < 3);
+
+</sashay away>
+
+The library is officially closed;
